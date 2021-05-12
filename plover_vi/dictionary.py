@@ -11,15 +11,23 @@ from plover_vi.stroke import Stroke, decompose, remap, subsets
 
 LONGEST_KEY=1
 
-vowel_mask: Stroke=Stroke("AOEU")
-left_mask: Stroke=Stroke("TKPWHR")
-left_w_mask: Stroke=Stroke("S")
-right_mask: Stroke=Stroke("-FRPBLG")
-right_w_mask: Stroke=Stroke("-S")
-star_mask: Stroke=Stroke("*")
-right_coda_mask: Stroke=Stroke("-FRPB")
-right_tone_mask: Stroke=Stroke("-LGTS")
-vowel_glide_mask: Stroke=vowel_mask|Stroke("S")
+vowel_mask               =Stroke("AOEU")
+left_mask                =Stroke("TKPWHR")
+left_w_mask              =Stroke("S")
+right_mask               =Stroke("-FRPBLG")
+right_w_mask             =Stroke("-S")
+star_mask                =Stroke("*")
+right_coda_mask          =Stroke("-FRPB")
+right_tone_mask          =Stroke("-LGTS")
+right_disambiguation_mask=Stroke("-TS")
+vowel_glide_mask         =vowel_mask|Stroke("S")
+
+right_disambiguation_index: Dict[Stroke, int]={
+        Stroke("")   : 0,
+        Stroke("-S") : 1,
+        Stroke("-T") : 2,
+        Stroke("-TS"): 3,
+        }
 
 left_to_right_mirror: Dict[str, str]={
 		'T-': '-L',
@@ -168,8 +176,9 @@ def lookup(strokes: List[str])->Optional[str]:
 	if stroke&vowel_mask:
 		if stroke&star_mask:
 			# 2-word brief
-			left_part, left_vowel_glide, right_part, star, rest=decompose(
-					stroke, left_mask, vowel_glide_mask, right_mask, star_mask)
+			left_part, left_vowel_glide, right_part, star, right_disambiguation, rest=decompose(
+					stroke, left_mask, vowel_glide_mask, right_mask, star_mask, right_disambiguation_mask)
+			if rest: return None
 			assert star==star_mask
 			words: List[str]=two_word_brief[
 					' '.join((
@@ -178,7 +187,9 @@ def lookup(strokes: List[str])->Optional[str]:
 						right_to_consonant[right_part],
 					))] #might raise KeyError
 			assert words
-			return words[0]
+			index=right_disambiguation_index[right_disambiguation]
+			if index>=len(words): return None
+			return words[index]
 		else:
 			# simple word
 			left_part, vowel_glide, right_coda, right_tone, rest=decompose(
