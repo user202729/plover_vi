@@ -187,6 +187,21 @@ def lookup(strokes: List[str])->Optional[str]:
 						right_to_consonant[right_part],
 					))] #might raise KeyError
 			assert words
+
+			try:
+				import plover_textarea
+				try:
+					instance=plover_textarea.extension.get_instance()
+					window_name=":plover_vi_brief_suggestion"
+					instance.clear(window_name)
+					for index, word in enumerate(words[:4]):
+						instance.write(window_name, f"{index+1}: {word}\n")
+					instance.write(window_name, "~~~")
+				except RuntimeError:
+					pass
+			except ImportError:
+				pass
+
 			index=right_disambiguation_index[right_disambiguation]
 			if index>=len(words): return None
 			return words[index]
