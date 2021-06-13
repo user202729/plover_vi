@@ -3,7 +3,7 @@ from typing import List, Dict, Optional, Union, Iterable
 from pathlib import Path
 import json
 
-from plover import system, config
+from plover import system, config  # type: ignore
 
 import plover_vi.config
 from plover_vi import library

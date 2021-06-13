@@ -1,8 +1,8 @@
 from typing import List, Dict, Iterable, Optional
 
-from plover import system
+from plover import system  # type: ignore
 
-from plover_stroke import BaseStroke
+from plover_stroke import BaseStroke  # type: ignore
 from plover_vi import initialize_independent_script
 
 class Stroke(BaseStroke): pass

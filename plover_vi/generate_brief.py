@@ -40,10 +40,12 @@ def generate(frequency: Dict[str, int])->Dict[str, str]:
 	for key, l in data.items():
 		for i, word in enumerate(l):
 			if word!=word.lower() and word.lower() in l:
-				l[i]=None
+				l[i]=None  # type: ignore
+				# (temporarily violate the type condition here, it will be fixed immediately below in the filter)
 		l[:]=list(filter(None, l))
 
-	return dict(sorted(data.items(), key=lambda x: len(x[1]), reverse=True))
+	return dict(sorted(data.items(), key=lambda x: len(x[1]), reverse=True))  # type: ignore
+	# for some reasons .items() is not recognizable as an iterable
 
 
 if __name__=="__main__":

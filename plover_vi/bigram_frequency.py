@@ -14,8 +14,8 @@ import sys
 import json
 from collections import Counter
 
-data=sys.stdin.read()
-data=re.split(r"(\w+)", data)
+data_=sys.stdin.read()
+data=re.split(r"(\w+)", data_)
 # 1, 3, ...: word
 # 0, 2, ...: non-word
 result=Counter(
