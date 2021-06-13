@@ -9,7 +9,7 @@ import plover_vi.config
 from plover_vi import library
 from plover_vi.stroke import Stroke, decompose, remap, subsets
 
-LONGEST_KEY=1
+LONGEST_KEY=2
 
 vowel_mask               =Stroke("AOEU")
 left_mask                =Stroke("TKPWHR")
@@ -167,11 +167,20 @@ except FileNotFoundError:
 
 def lookup(strokes: List[str])->Optional[str]:
 	#might raise KeyError
-	assert len(strokes)==1
+	assert len(strokes) in (1, 2)
+	disambiguation: Optional[Stroke]=None
+	index1: int=0
 	try:
 		stroke: Stroke=Stroke(strokes[0])
+		if len(strokes)==2:
+			disambiguation=Stroke(strokes[1])
+			if disambiguation not in right_disambiguation_index:
+				return None
+			index1=right_disambiguation_index[disambiguation]
+			assert index1!=0
 	except ValueError:
 		return None
+
 
 	if stroke&vowel_mask:
 		if stroke&star_mask:
@@ -203,10 +212,13 @@ def lookup(strokes: List[str])->Optional[str]:
 				pass
 
 			index=right_disambiguation_index[right_disambiguation]
+			if index1!=0 and index!=0: return None
+			index+=index1
 			if index>=len(words): return None
 			return words[index]
 		else:
 			# simple word
+			if index1: return None
 			left_part, vowel_glide, right_coda, right_tone, rest=decompose(
 					stroke, left_mask, vowel_glide_mask, right_coda_mask, right_tone_mask)
 			if rest: return None
@@ -218,6 +230,7 @@ def lookup(strokes: List[str])->Optional[str]:
 					right_to_tone[right_tone],
 					new_tone_placement=True, tolerant=True)
 	else:
+		if index1: return None
 		if stroke&star_mask:
 			# 1 or >=3-word brief
 			# TODO unimplemented
